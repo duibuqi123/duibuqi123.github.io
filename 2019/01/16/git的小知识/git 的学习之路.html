@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>git 的学习之路</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__html"><h2><a id="git__1"></a>git 的小知识</h2>
+<p><strong>1，简述一下git操作的步骤：</strong></p>
+<pre><code>* 新建一个文件夹
+* 在git窗口敲命令，先拉取远程代码：git clone  &lt;仓库名&gt;
+* 现在是master主分支上，创一个本地分支dong进行修改代码：git  branch  &lt;分支名&gt;
+* 修改完成，在本地分支进行添加到临时仓库：git add .（"." 代表所有都提交）
+* 然后提交到本地仓库：git commit -m "说明我这次提交主要是做了什么"
+* 接下来切换到master主分支，进行git pull 拉取远程仓库代码更新本地代码
+* 然后就git merge &lt;分支名&gt;把分支合并到主分支
+* 没有冲突而且测试也没有bug，就可以推动到远程仓库了git push origin  master 
+</code></pre>
+<p><strong>2，所有提交汇总成一个提交：</strong></p>
+<p>git在一个分支上开发一段时间后，会留下很多次的commit, 当一个功能阶段性的完成后，需要将该分支merge到主干，如果直接使用 git merge branch 会将该分支下所有的提交都merge到主干，有时这并不是我们所需要的，我们只需要总结一下该分支，然后以该总结的commit合并到主干就可以了。具体操作：</p>
+<pre><code>1、git checkout master 
+2、git merge --squash  branch
+3、git commit -m "branch功能完成，合并到主干" 
+</code></pre>
+<p>经过以上的3条命令，可以看到主分支上只有一个提交记录，分支的多次提交都已经合并提交完成！</p>
+<p><strong>3，添加之前可以回滚：</strong></p>
+<p>有时候你想在你git add 之前把那些操作都去掉，想回滚到未操作的状态，你就可以用以下命令:</p>
+<pre><code>//突然不想修改了，想把之前所有的修改都归0，回滚到未修改的状态
+//（ . 代表所有修改的操作都去掉，回滚到未操作的状态）
+
+git checkout .
+
+//只是不想修改某个文件，想把某个文件回滚到未修改的状态
+
+git checkout  dong.txt（文件名）
+</code></pre>
+<p><strong>4，添加之后回滚：</strong></p>
+<p>有时候在你添加之后你突然后悔了，不想要这些修改了，这时你就可以用以下命令进行回滚：</p>
+<pre><code>//添加之后回滚，用git checkout 没有用了，得用git reset 才有用
+
+git reset .  （ .  代表所有修改都回滚到添加之前的状态，就是之前修改的内容还在）
+</code></pre>
+<p><strong>5，提交之后回滚：</strong></p>
+<p>有时候在你提交之后，你后悔了，不想提交某个文件或者都不想提交了，这时你就可以用以下命令进行回滚，回滚到上一个版本，也就是说回滚到某一次提交之前。</p>
+<p>提交之后回滚需要提交的commit id，所以我们先git log 查看每一次提交的id：</p>
+<pre><code>#查看所有的提交记录
+git log  
+
+#会出现如下：
+commit 0216f1fb3d8ed5d6298c4f0ae3d7454c4ad23a22
+Author: david &lt;david@david&gt;
+Date:   Fri Aug 24 17:03:28 2018 +0800
+    提交说明
+    
+#通过show commit id查看具体的改动
+git show 0216f1fb3d8ed5d6298c4f0ae3d7454c4ad23a22
+</code></pre>
+<p><strong>6，回滚到指定版本</strong></p>
+<p>提交之后回滚有两种：<strong>软回滚</strong>和<strong>硬回滚</strong></p>
+<p><strong>硬回滚</strong>：指将提交指针HEAD移动到回滚节点，同时回滚节点之后所提交的代码全部丢弃。（回滚到某个版本，之前修改的内容还在；）</p>
+<p><strong>软回滚</strong>：指将提交指针HEAD移动的回滚节点，但是回滚节点之后提交的代码都会保留到暂存区。（回滚到某个版本，但是之前修改的内容已经删除了；）</p>
+<p>现在来进行提交之后回滚：</p>
+<pre><code>//提交之后回滚，回滚到某一次提交之前，需要提交的id即哈希值
+
+//软回滚
+git reset XXX( "XXX" 代表某一次提交的 commit id ) --soft 
+
+//硬回滚
+git reset XXX( "XXX" 代表某一次提交的 commit id ) --hard
+</code></pre>
+<p><strong>7，撤销回滚</strong></p>
+<p>这个是终极大招，因为这是后悔药，即便是硬回滚也没有关系，代码一样可以恢复如初。在git中，checkout，reset等操作都会被记录下来，方便撤销操作。</p>
+<pre><code>#查看操作历史
+
+git reflog
+</code></pre>
+<p><strong>8，push了错的代码到远端仓库之后，想撤回？？？</strong></p>
+<p>这个就想想就好了，撤不回的。</p>
+<p>但是你可以在夜黑风高的夜晚，等没有人去拉取远程仓库代码的时候，你就可以拉取下来进行修改，改好了之后，你再<strong>git add .</strong>  <strong>----&gt;</strong>  <strong>git commit  -m “修改”</strong>  <strong>—&gt;</strong> <strong>git  push</strong> ,这样第二天别人去拉取最新的代码的时候就是正确的代码，就没有你之前push的错的代码了，看还是有后悔药可以吃的。</p>
+<p><strong>9，个人建议</strong></p>
+<p>就是随时随地就久不久进行git status查看一下本地状态，写完代码之后就进行git diff进行对比，看看你修改代码的前后差别，看看你的代码是否已经写完整，有没有遗漏的，确定无误后再进行git add .  ，然后就一次性提交commit，一次性push推上远程仓库。</p>
+<p><strong>10，git 快速参看常用命令图</strong></p>
+<p>大家可以收藏一下，久不久看一眼也好~<br>
+<img src="https://img-blog.csdnimg.cn/20190418153405398.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDU0ODg4Nw==,size_16,color_FFFFFF,t_70" alt="git 快速查看常用命令图"></p>
+<p>欢迎个人大佬们指点~</p>
+<p>谢谢~</p>
+<p>纯属个人理解，请勿喷~</p>
+</div>
+</body>
+
+</html>
